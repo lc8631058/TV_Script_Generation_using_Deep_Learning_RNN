@@ -1,8 +1,8 @@
-# **Behavioral Cloning** 
+# **TV_Script_Generation_using_Deep_Learning_RNN** 
 
 ---
 
-**Behavioral Cloning Project**
+**TV Script Generation using Deep Learning (RNN)**
 
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
@@ -15,55 +15,72 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./examples/Behavioral_cloning.png "Model Visualization"
-[image2]: ./examples/central_driving.png "Grayscaling"
-[image3]: ./examples/crop_1.png "crop Image"
-[image4]: ./examples/crop_2.png "crop Image"
-[image6]: ./examples/flip_1.png "Flipped Image"
-[image7]: ./examples/flip_2.png "Flipped Image"
-[image8]: ./examples/case_1.png 
-[image9]: ./examples/case_2.png 
-[image10]: ./examples/recovery_1.png 
-[image11]: ./examples/recovery_2.png 
-[image12]: ./examples/model_2_curve.png 
-[image13]: ./examples/simulator_effect.jpg 
-
-
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
 ---
-### Files Submitted & Code Quality
 
-#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
-My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+### Data Exploration and Preprocessing
 
-#### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
-python drive.py model.h5
+#### 1. Explore the Data
+
+In the cell wth title `Explore the Data`, I show the dataset status like below:
+
+```python
+Roughly the number of unique words: 11492
+Number of scenes: 262
+Average number of sentences in each scene: 15.248091603053435
+Number of lines: 4257
+Average number of words in each line: 11.50434578341555
 ```
 
-#### 3. Submission code is usable and readable
+And some sentences from dataset are like:
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+```
+Moe_Szyslak: (INTO PHONE) Moe's Tavern. Where the elite meet to drink.
+Bart_Simpson: Eh, yeah, hello, is Mike there? Last name, Rotch.
+Moe_Szyslak: (INTO PHONE) Hold on, I'll check. (TO BARFLIES) Mike Rotch. Mike Rotch. Hey, has anybody seen Mike Rotch, lately?
+Moe_Szyslak: (INTO PHONE) Listen you little puke. One of these days I'm gonna catch you, and I'm gonna carve my name on your back with an ice pick.
+Moe_Szyslak: What's the matter Homer? You're not your normal effervescent self.
+Homer_Simpson: I got my problems, Moe. Give me another one.
+Moe_Szyslak: Homer, hey, you should not drink to forget your problems.
+Barney_Gumble: Yeah, you should only drink to enhance your social skills.
 
-### Model Architecture and Training Strategy
+```
 
-#### 1. An appropriate model architecture has been employed
+#### 2. Data Preprocessing
 
-My model consists of a convolution neural network with 5x5 filter sizes and depths between 24 and 36 (model.py lines 100-106) 
+After showing the basic information of dataset, I make the data preprocessing:
 
-The model includes RELU layers to introduce nonlinearity (code line 100), and the data is normalized in the model using a Keras lambda layer (code line 96), using Cropping2D function I cut the input images from size 160x320x3 to 74x320x3 (code line 97). Here are some examples of cropped image:
+```python 
+Lookup Table
+Tokenize Punctuation
+```
 
-![alt text][image3]
-![alt text][image4]
+The `Lookup Table` contains following functions:
+```python
+Dictionary to go from the words to an id, we'll call vocab_to_int
+Dictionary to go from the id to word, we'll call int_to_vocab
+```
 
-#### 2. Attempts to reduce overfitting in the model
+We'll be splitting the script into a word array using spaces as delimiters. However, punctuations like periods and exclamation marks make it hard for the neural network to distinguish between the word "bye" and "bye!". So the function `token_lookup` returns a dict that will be used to tokenize symbols like `!` into `||Exclamation_Mark||`. Create a dictionary for the following symbols where the symbol is the key and value is the token:
+```python
+Period ( . )
+Comma ( , )
+Quotation Mark ( " )
+Semicolon ( ; )
+Exclamation mark ( ! )
+Question mark ( ? )
+Left Parentheses ( ( )
+Right Parentheses ( ) )
+Dash ( -- )
+Return ( \n )
+```
+
+After that, preprocess all data and save them.
+
+### Build RNN
+
+
 
 The model contains dropout layers in order to reduce overfitting (model.py lines 102, 106). 
 
