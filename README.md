@@ -14,9 +14,9 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/one_hot_encoding 
-[image2]: ./examples/lookup_matrix 
-[image4]: ./examples/tokenize_lookup 
+[image1]: ./examples/one_hot_encoding.png
+[image2]: ./examples/lookup_matrix.png
+[image4]: ./examples/tokenize_lookup.png
 
 
 ### Data Exploration and Preprocessing
