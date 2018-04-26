@@ -1,185 +1,149 @@
-# **TV_Script_Generation_using_Deep_Learning_RNN** 
-
+# **Image Classification with Multiple Classes using CNN** 
 ---
 
-**TV Script Generation using Deep Learning (RNN)**
+**Build a Image Classification Project**
 
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
-* Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
-* Summarize the results with a written report
+
+* In this project I build a CNN, use it to make the 10 classes Image classification
+* First I will do some data preprocessing with [CIFAR 10 Dataset](https://www.cs.toronto.edu/~kriz/cifar.html) and make the data split step
+* Then I will play around with different parameters with tiny section of dataset, to try to find the relatively best choice of parameters 
+* Then I will use the training set of processed CIFAR-10 dataset to train my network and at the same time make the validation during training in order to avoid overfitting
+* After training with my network, I will use the saved model to test with test set, and get the final results of my network
+
 
 [//]: # (Image References)
 
-[image1]: ./examples/one_hot_encoding 
-[image2]: ./examples/lookup_matrix
-[image3]: ./examples/tokenize_lookup
+[image1]: ./examples/CIFAR-10.jpg "CIFAR-10"
+[image2]: ./examples/after_pre_process.png "Grayscaling"
+[image4]: ./examples/test_1.png "Traffic Sign 1"
+[image5]: ./examples/test_2.png "Traffic Sign 2"
+[image6]: ./examples/test_3.png "Traffic Sign 3"
+[image7]: ./examples/test_4.png "Traffic Sign 4"
+[image8]: ./examples/test_5.png "Traffic Sign 5"
+[image9]: ./examples/dataset_visul.png "dataset samples"
+
+## Rubric Points
+Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
+
 ---
+### Writeup / README
 
+This project is accomplished using a [ipyng](https://github.com/lc8631058/Image_Classification_with_Multiple_Classes_using_CNN/blob/master/dlnd_image_classification.ipynb) file, in order to visualize the details.
 
-### Data Exploration and Preprocessing
-
-#### 1. Explore the Data
-
-In the cell wth title `Explore the Data`, I show the dataset status like below:
-
-```python
-Roughly the number of unique words: 11492
-Number of scenes: 262
-Average number of sentences in each scene: 15.248091603053435
-Number of lines: 4257
-Average number of words in each line: 11.50434578341555
-```
-
-And some sentences from dataset are like:
-
-```
-Moe_Szyslak: (INTO PHONE) Moe's Tavern. Where the elite meet to drink.
-Bart_Simpson: Eh, yeah, hello, is Mike there? Last name, Rotch.
-Moe_Szyslak: (INTO PHONE) Hold on, I'll check. (TO BARFLIES) Mike Rotch. Mike Rotch. Hey, has anybody seen Mike Rotch, lately?
-Moe_Szyslak: (INTO PHONE) Listen you little puke. One of these days I'm gonna catch you, and I'm gonna carve my name on your back with an ice pick.
-Moe_Szyslak: What's the matter Homer? You're not your normal effervescent self.
-Homer_Simpson: I got my problems, Moe. Give me another one.
-Moe_Szyslak: Homer, hey, you should not drink to forget your problems.
-Barney_Gumble: Yeah, you should only drink to enhance your social skills.
-
-```
-
-#### 2. Data Preprocessing
-
-After showing the basic information of dataset, I make the data preprocessing:
-
-```python 
-Lookup Table
-Tokenize Punctuation
-```
-
-The `Lookup Table` contains following functions:
-```python
-Dictionary to go from the words to an id, we'll call vocab_to_int
-Dictionary to go from the id to word, we'll call int_to_vocab
-```
-
-We'll be splitting the script into a word array using spaces as delimiters. However, punctuations like periods and exclamation marks make it hard for the neural network to distinguish between the word "bye" and "bye!". So the function `token_lookup` returns a dict that will be used to tokenize symbols like `!` into `||Exclamation_Mark||`. Create a dictionary for the following symbols where the symbol is the key and value is the token:
-```python
-Period ( . )
-Comma ( , )
-Quotation Mark ( " )
-Semicolon ( ; )
-Exclamation mark ( ! )
-Question mark ( ? )
-Left Parentheses ( ( )
-Right Parentheses ( ) )
-Dash ( -- )
-Return ( \n )
-```
-
-After that, preprocess all data and save them.
-
-### Build RNN
-
-### Build RNN Cell and Initialize
-
-Stack one or more BasicLSTMCells in a MultiRNNCell.
-The Rnn size should be set using rnn_size
-Initalize Cell State using the MultiRNNCell's zero_state() function
-Apply the name "initial_state" to the initial state using tf.identity()
-Return the cell and initial state in the following tuple (Cell, InitialState)
-
-Above steps are implemented by `get_init_cell` function.
-
-#### Word Embedding
-When you're dealing with words in text, you end up with tens of thousands of classes to predict, one for each word. Trying to one-hot encode these words is massively inefficient, you'll have one element set to 1 and the other 50,000 set to 0. The matrix multiplication going into the first hidden layer will have almost all of the resulting values be zero. This a huge waste of computation.
-[!alt text][image1]
-To solve this problem and greatly increase the efficiency of our networks, we use what are called embeddings. Embeddings are just a fully connected layer like you've seen before. We call this layer the embedding layer and the weights are embedding weights. We skip the multiplication into the embedding layer by instead directly grabbing the hidden layer values from the weight matrix. We can do this because the multiplication of a one-hot encoded vector with a matrix returns the row of the matrix corresponding the index of the "on" input unit.
-
-Instead of doing the matrix multiplication, we use the weight matrix as a lookup table. We encode the words as integers, for example "heart" is encoded as 958, "mind" as 18094. Then to get hidden layer values for "heart", you just take the 958th row of the embedding matrix. This process is called an embedding lookup and the number of hidden units is the embedding dimension.
-
-Embeddings aren't only used for words of course. You can use them for any model where you have a massive number of classes. A particular type of model called Word2Vec uses the embedding layer to find vector representations of words that contain semantic meaning.
-
-Apply embedding to input_data using TensorFlow. Return the embedded sequence.
-
-The model contains dropout layers in order to reduce overfitting (model.py lines 102, 106). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 72-82). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-#### 3. Model parameter tuning
-
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 113).
-
-#### 4. Appropriate training data
-
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road to train my model. I added a correction value to the steering angle of left-side images and right-side images, this correction value is 0.25. I didn't collect data by myself, cause I used to use some data collected by myself, but the result is really bad, so I think collect data by ourselves could create many uncertain factors, especitalluy our keyboard only have 4 keys to control the direction, but the directions should be various value, cause this is a regression problem. The udacity's data has no recovery data, the recovery data represents the data collected when the car runs away the road, we recover the car from side of the road to the middle of the road. So we use the left- and right- images collected by side cameras in front of the car to replace the recovery date, we also add a correction to these side-images' steering angle. At final we flipped all data in order to augment the data, and then these steering angles are set as the steering angle of flipped data by multiply by -1.0. For example, here is an image that has then been flipped:
-
-![alt text][image6]
-![alt text][image7]
-
-For details about how I created the training data, see the next section. 
-
-### Model Architecture and Training Strategy
-
-#### 1. Solution Design Approach
-
-The overall strategy for deriving a model architecture was to read the [Nvidia's paper](https://github.com/lc8631058/SDCND/blob/master/P3_Behavioral%20Cloning/End%20to%20End%20Learning%20for%20Self-Driving%20Cars.pdf) provided by udacity.
-
-My first step was to use a convolution neural network model similar to the [Nvidia's architecture](https://github.com/lc8631058/SDCND/blob/master/P3_Behavioral%20Cloning/End%20to%20End%20Learning%20for%20Self-Driving%20Cars.pdf). I thought this model might not be appropriate because I only use the data provided by udacity, it's not a big dataset, so I need to reduce the convolutional layers as well as dense layers describe in Nvidia's architecture.
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that I added BatchNormalization function after each layer eacept for last dense layer(code line 98, 101, 105), as well as dropout layers described above.
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track as shown in below images. 
-
-![alt text][image8]
-![alt text][image9]
-To improve the driving behavior in these cases, I re-train the model to further decrease the loss, here is the loss_curve:
-![alt text][image12]
-And I found that, the graphic quality and screen resolution of the simulator also influent the test results, for a same model in higher effect my car will press the lines, but with lowest effect it won’t. So I turn donw the graphic quality and screen resolution to lowest, then my car can run through whole track smoothly.
-![alt text][image13]
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-#### 2. Final Model Architecture
-
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes:
-
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 160x320x3 RGB image							| 
-| Cropping         		| 74x320x3 RGB image							| 
-| Batch Normalization         		| 						| 
-| Convolution 5x5    	| 2x2 stride, valid padding, outputs 35x158x24 	|
-| Batch Normalization         		| 						| 
-| RELU					|												|
-| Convolution 5x5	    | 2x2 stride, valid padding, outputs 16x77x36 	|
-| Batch Normalization         		| 						| 
-| RELU					|												|
-| Fully connected		| 100 hidden units	|
-| Batch Normalization         		| 						| 
-| RELU					|												|
-| Fully connected		| 1 hidden units	|
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+### Data Set Summary & Exploration
+The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. There are 50000 training images and 10000 test images. Here is some simple samples from this dataset:
 
 ![alt text][image1]
 
-#### 3. Creation of the Training Set & Training Process
+I used the pandas library to calculate summary statistics of the CIFAR-10 data set:
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+* The size of training set is ? 
+```python
+n_train = len(X_train)
+==> 60000
+```
+* The size of the validation set is ?
+```python
+n_validation = len(X_valid)
+==> 6000
+```
 
-![alt text][image2]
+#### 1. Data Preprocessing.
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recovery from side to center. These images show what a recovery looks like starting from right side and left side of a road :
+(1) First we nomalize the RGB data from value range 0 to 255 to range 0-1, this simple step is realized by function `normalize`.
 
-![alt text][image10]
-![alt text][image11]
+(2) I use `LabelBinarizer()` from sklearn to implement the `one_hot_encode` function, to realize one hot encode for labels. Just give a Map which includes the classes your labels have, and the `LabelBinarizer` will fit the class by itself.
 
-I didnt's repeated this process on track two, cause collect data in track two by myself will create many biases, so I think it's not necessary right now, I don't want to bring some misleading to my network.
+(3) For data randomization, because the images in dataset are already randomized, so it's not necessary to randomize it again.
 
-After the collection process, I had 9942 number of data points. I then preprocessed this data by the approach describe above.
+(4) The function `preprocess_and_save_data` in helper.py combined all data-preprocessing functions together and after processing it will save the data as pickle file. 
 
-I finally randomly shuffled the data set and put 20% of the data into a validation set. 
+### Design and Test a Model Architecture
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 60 as evidenced by training. I used an adam optimizer so that manually training the learning rate wasn't necessary.
+As a first step, I decided to convert the images to grayscale because this can eliminate the effect of colors, but after training, I found that the RGB data have better result than the grayscale data. So finally, I decided to use RGB data. 
+
+(1) In the functions `neural_net_image_input`, `neural_net_label_input`, `neural_net_keep_prob_input` I set 3 placeholders as the inputs, labels, and keep_probability of dropout layer.
+
+(2) In function `conv2d_maxpool` I implement conv layer and max-pool layer.
+
+(3) Function `flatten` will flatten all the images into one vector~
+
+(4) Function `fully_conn` realize the final fully connected layer.
+
+(5) And we also have `output` function to generate the final output.
+
+#### 1. Describe final model architecture.
+
+My final model consisted of the following layers:
+
+| Layer         		|     Description	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Input         		| 32x32x3 RGB image   							| 
+| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x40 	|
+| RELU					|												|
+| Max pooling	      	| 2x2 stride,  outputs 16x16x40 				|
+| Convolution 3x3	    | 1x1 stride, same padding, outputs 32x32x80 	|
+| RELU					|												|
+| Max pooling	      	| 2x2 stride,  outputs 16x16x80				|
+| Convolution 3x3	    | 1x1 stride, same padding, outputs 32x32x160 	|
+| RELU					|												|
+| Max pooling	      	| 2x2 stride,  outputs 16x16x160 |
+| Fully connected		| 512 hidden units	|
+| RELU					|												|
+| Fully connected		| 256 hidden units	|
+| RELU					|												|
+| Fully connected		| 128 hidden units	|
+| RELU					|												|
+| Fully connected		| 10 hidden units	|
+| Softmax				| 10 hidden units	|
+ 
+
+
+#### 2. Describe how to train the model.
+
+To train the model, I use the model described in this [paper](https://github.com/lc8631058/SDCND/blob/master/P2-Traffic-Sign-Classifier/Traffic%20Sign%20Recognition%20with%20Multi-Scale%20Convolutional%20Networks.pdf), so I use 3 convlutional layers and 3 fully-connected layers, each convolutional part is composed of convolution, relu, max_pool, batch_normalization, dropout techniche in order. The dropout probability is 0.5, and I add dropout and batch-normalization after each layer except for the last output layer. I set batch_size to 80, cause that's the maximum batch_size that my GPU resource could afford. As for learning-rate I choose 0.001 by experience.
+
+#### 4. Describe the approach taken for finding a solution. 
+
+My final model results were:
+* training set accuracy of 85.3%
+* validation set accuracy of 80.5% 
+* test set accuracy of 80.2%
+
+### Test a Model on New Images
+
+#### 1. Here are the test results: 
+
+The second image might be difficult to classify because as you can see the brightness is very low, it's hard to recognize the sign by eyes. The others should be easier to classify.
+
+#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+
+Here are the results of the prediction:
+
+| Image			        |     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| Speed limit (50km/h)     		| Speed limit (50km/h)   									| 
+| End of speed limit (80km/h)     			| End of speed limit (80km/h) 										|
+| No entry					| No entry											|
+| Dangerous curve to the left	      		| Dangerous curve to the left					 				|
+| Traffic signals			| Traffic signals      							|
+
+
+The model was able to correctly guess 5 of the 5 traffic signs, which gives an accuracy of 100%. This compares favorably to the accuracy on the test set of 97.29%.
+
+ Actually I choose totally 45 images as the new images download from web, and the final mean accuracy of the 45 new images is 96.97%. I test them by setting evey 5 images as a batch, some of batches get 80% accuracy and some get 100%. So the above 5 images are the first batch of 45 images, and fortunately they have been predicted 100% correct. 
+ 
+#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
+
+The code for making predictions on my final model is located in the 43th cell of the Ipython notebook.
+
+For the first image, the model is relatively sure that this is Dangerous curve to the right sign (probability of 9.99915719e-01), and the image does exist Dangerous curve to the right sign. The top five soft max probabilities were
+
+| Probability         	|     Prediction	        					| 
+|:---------------------:|:---------------------------------------------:| 
+| 9.99915719e-01        			| Dangerous curve to the right  									| 
+| 4.76271380e-05     				| Children crossing    										|
+| 2.77236813e-05					| End of all speed and passing limits  										|
+| 5.58202373e-06	      			| Pedestrians  					 				|
+| 1.41421299e-06			    | Speed limit (20km/h)         							|
