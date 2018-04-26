@@ -14,8 +14,9 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/Behavioral_cloning.png "Model Visualization"
-
+[image1]: ./examples/one_hot_encoding 
+[image2]: ./examples/lookup_matrix
+[image3]: ./examples/tokenize_lookup
 ---
 
 
@@ -80,7 +81,26 @@ After that, preprocess all data and save them.
 
 ### Build RNN
 
+### Build RNN Cell and Initialize
 
+Stack one or more BasicLSTMCells in a MultiRNNCell.
+The Rnn size should be set using rnn_size
+Initalize Cell State using the MultiRNNCell's zero_state() function
+Apply the name "initial_state" to the initial state using tf.identity()
+Return the cell and initial state in the following tuple (Cell, InitialState)
+
+Above steps are implemented by `get_init_cell` function.
+
+#### Word Embedding
+When you're dealing with words in text, you end up with tens of thousands of classes to predict, one for each word. Trying to one-hot encode these words is massively inefficient, you'll have one element set to 1 and the other 50,000 set to 0. The matrix multiplication going into the first hidden layer will have almost all of the resulting values be zero. This a huge waste of computation.
+[!alte][image1]
+To solve this problem and greatly increase the efficiency of our networks, we use what are called embeddings. Embeddings are just a fully connected layer like you've seen before. We call this layer the embedding layer and the weights are embedding weights. We skip the multiplication into the embedding layer by instead directly grabbing the hidden layer values from the weight matrix. We can do this because the multiplication of a one-hot encoded vector with a matrix returns the row of the matrix corresponding the index of the "on" input unit.
+
+Instead of doing the matrix multiplication, we use the weight matrix as a lookup table. We encode the words as integers, for example "heart" is encoded as 958, "mind" as 18094. Then to get hidden layer values for "heart", you just take the 958th row of the embedding matrix. This process is called an embedding lookup and the number of hidden units is the embedding dimension.
+
+Embeddings aren't only used for words of course. You can use them for any model where you have a massive number of classes. A particular type of model called Word2Vec uses the embedding layer to find vector representations of words that contain semantic meaning.
+
+Apply embedding to input_data using TensorFlow. Return the embedded sequence.
 
 The model contains dropout layers in order to reduce overfitting (model.py lines 102, 106). 
 
