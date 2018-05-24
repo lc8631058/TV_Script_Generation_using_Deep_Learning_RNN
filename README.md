@@ -5,10 +5,10 @@
 **TV Script Generation using Deep Learning (RNN)**
 
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
+* Preprocess the text data, explore them, and save them
+* Build, a RNN in Tensorflow that predicts new sentences 
 * Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
+* Test that the model could generate some sentences that has no obvious grammatical errors
 * Summarize the results with a written report
 
 
